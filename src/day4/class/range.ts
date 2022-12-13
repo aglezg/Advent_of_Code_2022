@@ -11,4 +11,15 @@ export class Range {
     }
     return false;
   }
+
+  overlap(range: Range): boolean {
+    if (this.include(new Range(range.first, range.first)) ||
+    this.include(new Range(range.last, range.last))) {
+      return true;
+    } else if (range.include(new Range(this.first, this.first)) ||
+    range.include(new Range(this.last, this.last))) {
+      return true;
+    }
+    return false;
+  }
 }
