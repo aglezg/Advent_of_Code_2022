@@ -1,6 +1,6 @@
-import { assert } from "console";
 import { existsSync, readFileSync } from "fs";
 import { argv } from "process";
+import { Range } from "./class/range";
 
 let input: string = argv[2];
 let lines: string[] = [];
@@ -9,19 +9,6 @@ if (!existsSync(input)) {
     console.error("err: file does not exist")
 } else {
     lines = readFileSync(input).toString().split(/\r?\n/);
-}
-
-class Range {
-  constructor(public first: number, public last: number) {
-    assert(first <= last);
-  }
-
-  include(range: Range): boolean {
-    if (this.first <= range.first && this.last >= range.last) {
-      return true;
-    }
-    return false;
-  }
 }
 
 let counterPairs: number = 0;
