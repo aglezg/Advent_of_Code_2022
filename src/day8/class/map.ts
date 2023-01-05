@@ -45,8 +45,12 @@ export class Map {
    * @returns Return the score
    */
   public getScore(i: number, j: number): number {
-    return this.getScoreFrom(i, j, "N") * this.getScoreFrom(i, j, "S") *
-      this.getScoreFrom(i, j, "E") * this.getScoreFrom(i, j, "W");
+    if (this.isExtreme(i, j)) {
+      return 0;
+    } else {
+      return this.getScoreFrom(i, j, "N") * this.getScoreFrom(i, j, "S") *
+        this.getScoreFrom(i, j, "E") * this.getScoreFrom(i, j, "W");
+    }
   }
 
   /**
@@ -58,53 +62,49 @@ export class Map {
    */
   private getScoreFrom(i: number, j: number, dir: Direction): number {
     let score: number = 0;
-    switch(dir) {
-      case "N":
-        for (let k: number = i - 1; k >= 0; k--)
-          if (this.isLower(k, j, i, j)) {
-            score++;
-          } else if (this.matrix[k][j] == this.matrix[i][j]) {
-            score++;
-            break;
-          } else {
-            break;
-          }
-        break;
-      case "S":
-        for (let a: number = i + 1; a < this.matrix.length; a++)
-          if (this.isLower(a, j, i, j)) {
-            score++;
-          } else if (this.matrix[a][j] == this.matrix[i][j]) {
-            score ++;
-            break;
-          } else {
-            break;
-          }
-        break;
-      case "E":
-        for (let a: number = j + 1; a < this.matrix[i].length; a++)
-          if (this.isLower(i, a, i, j)) {
-            score++;
-          } else if (this.matrix[i][a] == this.matrix[i][j]) {
-            score ++;
-            break;
-          } else {
-            break;
-          }
-        break;
-      case "W":
-        for (let a: number = j - 1; a >= 0; a--)
-          if (this.isLower(i, a, i, j)) {
-            score++;
-          } else if (this.matrix[i][a] == this.matrix[i][j]) {
-            score ++;
-            break;
-          } else {
-            break;
-          }
-        break;
+    if (this.isExtreme(i, j)) {
+      return 0;
+    } else {
+      switch(dir) {
+        case "N":
+          for (let k: number = i - 1; k >= 0; k--)
+            if (this.isLower(k, j, i, j)) {
+              score++;
+            } else {
+              score++;
+              break;
+            }
+          break;
+        case "S":
+          for (let a: number = i + 1; a < this.matrix.length; a++)
+            if (this.isLower(a, j, i, j)) {
+              score++;
+            } else {
+              score++;
+              break;
+            }
+          break;
+        case "E":
+          for (let a: number = j + 1; a < this.matrix[i].length; a++)
+            if (this.isLower(i, a, i, j)) {
+              score++;
+            } else {
+              score++;
+              break;
+            }
+          break;
+        case "W":
+          for (let a: number = j - 1; a >= 0; a--)
+            if (this.isLower(i, a, i, j)) {
+              score++;
+            } else {
+              score++;
+              break;
+            }
+          break;
+      }
+      return score;
     }
-    return score;
   }
 
   /**

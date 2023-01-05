@@ -38,10 +38,8 @@ for (let i: number = 0; i < myMap.matrix.length; i++) {
     let score: number =  myMap.getScore(i, j);
     if (score > maxScore) {
       maxScore = score;
-      console.log("New max score!! >> ", maxScore);
-      console.log("From (", i, ", ", j, ")");
     }
   }
 }
-
+g
 console.log("Answer: ", maxScore);
