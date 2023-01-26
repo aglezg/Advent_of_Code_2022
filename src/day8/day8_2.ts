@@ -41,5 +41,5 @@ for (let i: number = 0; i < myMap.matrix.length; i++) {
     }
   }
 }
-g
+
 console.log("Answer: ", maxScore);
