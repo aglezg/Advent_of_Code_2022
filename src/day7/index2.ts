@@ -2,7 +2,8 @@ import { existsSync, readFileSync } from "fs";
 import { argv, exit } from "process";
 import { Directory } from "./class/directory";
 import { File } from "./class/file";
-import { isCommand } from "./utils";
+import { isCommand, selectDirectoryToDelete } from "./utils";
+
 
 // Create the root directory
 let root: Directory = new Directory("root");
@@ -90,18 +91,20 @@ for (let i: number = 0; i < lines.length; i++) {
     }
 }
 
-// Limit directory size
-let limit: number = 100000;
 
-// Total size of all directories with total size of at most 'limit'
-let totalSize: number = 0;
+// Total disk space available
+let totalSpaceAvailable: number = 70000000;
 
-// Sum of all directories sizes with total size of at most 'limit'
-directories.forEach((directory: Directory) => {
-    if (directory.getSize() <= limit) {
-        totalSize += directory.getSize();
-    }
-});
+// Unused space required
+let unusedSpaceRequired: number = 30000000;
 
-// Print total size
-console.log("Total size > " + totalSize);
+// Total space used
+let totalSpaceUsed: number = root.getSize();
+
+// Select a directory to delete that will free up enough space
+let directoryToDelete: Directory | undefined = selectDirectoryToDelete(totalSpaceAvailable, unusedSpaceRequired, totalSpaceUsed, directories);
+if (directoryToDelete) {
+    console.log('rm -r ' + directoryToDelete.route + '(' + directoryToDelete.getSize() + ' bytes)');
+} else {
+    console.log('No directory should be deleted');
+}
