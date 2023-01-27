@@ -1,121 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { argv, exit } from "process";
-
-/**
- * File class
- * @class File
- * @property {string} name Name of the file
- * @property {number} size Size of the file
- */
-export class File {
-    /**
-     * Constructor
-     * @param name Name of the file
-     * @param size Size of the file
-     */
-    constructor(public name: string, public size: number) {}
-}
-
-/**
- * Directory class
- * @class Directory
- * @property {string} name Name of the directory
- * @property {Set<File | Directory>} content Files | Directories in the directory
- */
-export class Directory {
-    /**
-     * Constructor
-     * @param route Route of the directory
-     * @param content Files | Directories in the directory
-     */
-    constructor(public route: string, public content: Set<File | Directory> = new Set<File | Directory>()) {}
-
-    /**
-     * Get name of the directory
-     * @returns Name of the directory
-     */
-    public getName(): string {
-        if (this.route == '/') {
-            return 'root';
-        } else {
-            let route: string[] = this.route.split('/');
-            return route[route.length - 1];
-        }
-    }
-
-    /**
-     * Get the size of the directory
-     * @returns Size of the directory
-     */
-    public getSize(): number {
-        let size: number = 0;
-        this.content.forEach((element: File | Directory) => {
-            if (element instanceof File) {
-                size += element.size;
-            } else {
-                size += element.getSize();
-            }
-        });
-        return size;
-    }
-
-    /**
-     * Add file or directory to the directory
-     * @param element File or directory to add
-     * @returns True if the element was added, false if not
-     */
-    public add(element: File | Directory): boolean {
-        if (this.content.has(element)) {
-            return false;
-        } else {
-            this.content.add(element);
-            return true;
-        }
-    }
-
-    /**
-     * Find file or directory in the directory
-     * @param name Name of the file or directory to find
-     * @returns File or directory if found, undefined if not
-     */
-    public find(name: string): File | Directory | undefined {
-        let found: File | Directory | undefined;
-        this.content.forEach((element: File | Directory) => {
-            if (element instanceof File && element.name === name) {
-                found = element;
-            } else if (element instanceof Directory && element.getName() === name) {
-                found = element;
-            }
-        });
-        return found;
-    }
-
-    /**
-     * Get parent directory name
-     * @returns Name of the parent directory if exists, undefined if not
-     */
-    public getParentName(): string | undefined {
-        if (this.route == '/') {
-            return undefined;
-        } else {
-            let route: string[] = this.route.split('/');
-            route.pop();
-            if (route.length == 1) {
-                return 'root';
-            } else {
-                return route[route.length - 1];
-            }
-        }
-    }
-
-    /**
-     * Print content of the directory
-     * @param level Level of the directory
-     */
-    public print(level: number = 0): void {
-        // not implemented yet
-    }
-}
+import { Directory } from "./class/directory";
+import { File } from "./class/file";
 
 /**
  * Check if line is a command
@@ -138,7 +24,7 @@ if (!existsSync(input)) {
     lines = readFileSync(input).toString().split(/\r?\n/);
 }
 
-// Set of Directories
+// Set of visited directories
 let directories: Set<Directory> = new Set<Directory>([root]);
 
 // Actual directory
@@ -211,12 +97,18 @@ for (let i: number = 0; i < lines.length; i++) {
     }
 }
 
-// Sum of all directories sizes with total size of at most 100000
+// Limit directory size
+let limit: number = 100000;
+
+// Total size of all directories with total size of at most 'limit'
 let totalSize: number = 0;
+
+// Sum of all directories sizes with total size of at most 'limit'
 directories.forEach((directory: Directory) => {
-    if (directory.getSize() <= 100000) {
+    if (directory.getSize() <= limit) {
         totalSize += directory.getSize();
     }
 });
 
-console.log(totalSize);
+// Print total size
+console.log("Total size > " + totalSize);
