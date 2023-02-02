@@ -7,14 +7,14 @@ import { Direction } from "../types/direction";
  * @property {[number, number]} horizontalSize - The horizontal size of the map.
  * @property {[number, number]} verticalSize - The vertical size of the map.
  */
-class Map {
+export class Map {
 
     /**
      * Create a map.
      * @param {[number, number]} horizontalSize - The horizontal size of the map.
      * @param {[number, number]} verticalSize - The vertical size of the map.
      */
-    constructor(private horizontalSize: [number, number], private verticalSize: [number, number]) {
+    constructor(private horizontalSize: [number, number] = [0, 0], private verticalSize: [number, number] = [0, 0]) {
         assert(horizontalSize[0] <= horizontalSize[1] && verticalSize[0] <= verticalSize[1], 'err: size definition is incorrect');
     }
 

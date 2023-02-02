@@ -1,36 +1,42 @@
+import { assert } from 'console';
 import { Direction } from '../types/direction';
+
+export type Position = [number, number];
 
 /**
  * Class representing a rope.
  * @class Rope
- * @property {[number, number]} head - The head ubication of the rope.
- * @property {[number, number]} tail - The tail ubication of the rope.
+ * @property {Position[]} Knots - Knots positions of the rope.
  */
 export class Rope {
 
-    private head: [number, number] = [0, 0];
-    private tail: [number, number] = [0, 0];
+    private knots: Position[] = [];
 
     /**
      * Create a rope.
      * @param {[number, number]} start - The start ubication of the rope.
+     * @param {number} knots Number of knots.
+     * @throws {Error} If knots is less than 2.
      */
-    constructor(start: [number, number] = [0, 0]) {
-        this.head[0] = start[0];
-        this.head[1] = start[1];
-        this.tail[0] = start[0];
-        this.tail[1] = start[1];
+    constructor(start: [number, number] = [0, 0], knots: number = 2) {
+        assert(knots >= 2, 'err: rope must have at least 2 knots');
+        for (let i = 0; i < knots; i++) {
+            this.knots.push([start[0], start[1]]);
+        }
     }
 
     /**
      * Reset position of the rope.
      * @param {[number, number]} start - The start ubication of the rope.
+     * @param {number} knots Number of knots.
+     * @throws {Error} If knots is less than 2.
      */
-    public reset(start: [number, number] = [0, 0]): void {
-        this.head[0] = start[0];
-        this.head[1] = start[1];
-        this.tail[0] = start[0];
-        this.tail[1] = start[1];
+    public reset(start: [number, number] = [0, 0], knots: number = 2): void {
+        assert(knots >= 2, 'err: rope must have at least 2 knots');
+        this.knots = [];
+        for (let i = 0; i < knots; i++) {
+            this.knots.push([start[0], start[1]]);
+        }
     }
 
     /**
@@ -38,7 +44,7 @@ export class Rope {
      * @returns {[number, number]} The head ubication of the rope.
      */
     public getHead(): [number, number] {
-        return this.head;
+        return this.knots[0];
     }
 
     /**
@@ -46,72 +52,129 @@ export class Rope {
      * @returns {[number, number]} The tail ubication of the rope.
      */
     public getTail(): [number, number] {
-        return this.tail;
+        return this.knots[this.knots.length - 1];
+    }
+
+    /**
+     * Get a certain knot of the rope.
+     * @param {number} index - The index of the knot.
+     * @returns {[number, number]} The knot ubication of the rope.
+     * @throws {Error} If index is out of bounds.
+     */
+    public getKnot(index: number): [number, number] {
+        assert(index >= 0 && index < this.knots.length, 'err: index out of bounds');
+        return this.knots[index];
+    }
+
+
+    /**
+     * Get knots of the rope.
+     * @returns {Position[]} The knots of the rope.
+     */
+    public getKnots(): Position[] {
+        return this.knots;
     }
 
     /**
      * Move the rope.
-     * @param {Direction} direction - The direction to move the rope.
+     * @param {Direction} direction - The direction to move.
+     * @throws {Error} If length is negative.
      */
     public move(direction: Direction): void {
         switch (direction) {
             case 'U':
-                this.head[1] += 1;
+                this.getHead()[1] += 1;
                 break;
             case 'D':
-                this.head[1] -= 1;
+                this.getHead()[1] -= 1;
                 break;
             case 'L':
-                this.head[0] -= 1;
+                this.getHead()[0] -= 1;
                 break;
             case 'R':
-                this.head[0] += 1;
+                this.getHead()[0] += 1;
                 break;
         }
-        this.UdateTail(direction);
+        this.updateKnots();
     }
 
     /**
-     * Udate tail position
-     * @param {Direction} direction - The direction to move the rope.
+     * Update the knots of the rope.
      */
-    public UdateTail(direction: Direction): void {
-        if (!this.isTailAdyacent()) {
-            switch (direction) {
-                case 'U':
-                    this.tail[0] = this.head[0];
-                    this.tail[1] = this.head[1] - 1;
-                    break;
-                case 'D':
-                    this.tail[0] = this.head[0];
-                    this.tail[1] = this.head[1] + 1;
-                    break;
-                case 'L':
-                    this.tail[0] = this.head[0] + 1;
-                    this.tail[1] = this.head[1];
-                    break;
-                case 'R':
-                    this.tail[0] = this.head[0] - 1;
-                    this.tail[1] = this.head[1];
-                    break;
+    private updateKnots(): void {
+        for(let i = 1; i < this.knots.length; i++) {
+            this.updateKnot(i);
+        }
+    }
+
+    /**
+     * Update an specific knot of the rope.
+     * @param {number} index - The index of the knot.
+     * @throws {Error} If index is out of bounds.
+     */
+    private updateKnot(index: number): void {
+        assert(index >= 0 && index < this.knots.length, 'err: index out of bounds');
+        if (index === 0 || this.areKnotsAdyacent(this.knots[index], this.knots[index - 1])) {
+            return;
+        }
+        let knot: Position = this.knots[index];
+        let previousKnot: Position = this.knots[index - 1];
+        let horizontalDistace: number = Math.abs(previousKnot[0] - knot[0]);
+        let verticalDistance: number = Math.abs(previousKnot[1] - knot[1]);
+        if (horizontalDistace > verticalDistance) {
+            if (previousKnot[1] > knot[1]) {
+                knot[1] = knot[1] + verticalDistance ;
+            } else {
+                knot[1] = knot[1] - verticalDistance;
+            }
+            if(previousKnot[0] > knot[0]) {
+                knot[0] = knot[0] + horizontalDistace - 1;
+            } else {
+                knot[0] = knot[0] - horizontalDistace + 1;
+            }
+        } else if (horizontalDistace < verticalDistance) {
+            if (previousKnot[0] > knot[0]) {
+                knot[0] = knot[0] + horizontalDistace;
+            } else {
+                knot[0] = knot[0] - horizontalDistace;
+            }
+            if (previousKnot[1] > knot[1]) {
+                knot[1] = knot[1] + verticalDistance - 1;
+            } else {
+                knot[1] = knot[1] - verticalDistance + 1;
+            }
+        } else {
+            if (previousKnot[0] > knot[0]) {
+                knot[0] = knot[0] + horizontalDistace - 1;
+            } else {
+                knot[0] = knot[0] - horizontalDistace + 1;
+            }
+            if (previousKnot[1] > knot[1]) {
+                knot[1] = knot[1] + verticalDistance - 1;
+            } else {
+                knot[1] = knot[1] - verticalDistance + 1;
             }
         }
     }
-
+    
     /**
-     * Check if head is adyacent to tail.
-     * @returns {boolean} True if head is adyacent to tail, false otherwise.
+     * Check if a knot is adyacent to other knot.
+     * @param {Position} knot - The knot to check.
+     * @param {Position} otherKnot - The other knot to check.
+     * @returns {boolean} True if the knot is adyacent to other knot.
      * */
-    private isTailAdyacent(): boolean {
-        return Math.abs(this.head[0] - this.tail[0]) <= 1 && Math.abs(this.head[1] - this.tail[1]) <= 1;
+    private areKnotsAdyacent(knot: Position, otherKnot: Position): boolean {
+        return Math.abs(knot[0] - otherKnot[0]) <= 1 && Math.abs(knot[1] - otherKnot[1]) <= 1;
     }
 
     /**
-     * Print the rope.
-     * */
+     * Print rope information.
+     */
     public print(): void {
-        console.log(`Head: ${this.head}`);
-        console.log(`Tail: ${this.tail}\n`);
+        for(let i = 0; i < this.knots.length; i++) {
+            console.log(`Knot ${i}: ${this.knots[i]}`);
+        }
+        console.log();
     }
 
 }
